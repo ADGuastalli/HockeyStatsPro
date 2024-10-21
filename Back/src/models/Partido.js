@@ -12,21 +12,22 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.DATE,
         allowNull: false,
       },
-      rival: {
-        type: DataTypes.ARRAY(DataTypes.STRING),
-        allowNull: true,
+      fechaTorneo: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
+      clubId: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+          model: "Clubes",
+          key: "id",
+        },
       },
       torneoId: {
         type: DataTypes.INTEGER,
         references: {
           model: "Torneo",
-          key: "id",
-        },
-      },
-      cuartoId: {
-        type: DataTypes.INTEGER,
-        references: {
-          model: "Cuarto",
           key: "id",
         },
       },

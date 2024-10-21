@@ -30,8 +30,8 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.INTEGER,
         allowNull: false,
         references: {
-          model: "Clubes", // Nombre de la tabla Clubes
-          key: "id", // Campo que actúa como llave foránea
+          model: "Clubes",
+          key: "id",
         },
       },
     },

@@ -3,6 +3,7 @@ const express = require("express");
 const sequelize = require("./src/db");
 const routes = require("./src/routers/routers");
 const preloadClubs = require("./src/preload");
+const preloadTorneos = require("./src/preload");
 const cors = require("cors");
 
 const app = express();
@@ -30,6 +31,9 @@ async function testConnection() {
 
     // Cargar clubes
     await preloadClubs();
+
+    // Cargar torneos
+    await preloadTorneos();
   } catch (error) {
     console.error("No se pudo conectar a la base de datos:", error);
   }

@@ -8,31 +8,15 @@ module.exports = (sequelize, DataTypes) => {
         primaryKey: true,
         allowNull: false,
       },
-      primerCuarto: {
+      numero: {
         type: DataTypes.INTEGER,
-        references: {
-          model: "Estadistica",
-          key: "id",
-        },
+        allowNull: false,
       },
-      segundoCuarto: {
+      partidoId: {
         type: DataTypes.INTEGER,
+        allowNull: false,
         references: {
-          model: "Estadistica",
-          key: "id",
-        },
-      },
-      tercerCuarto: {
-        type: DataTypes.INTEGER,
-        references: {
-          model: "Estadistica",
-          key: "id",
-        },
-      },
-      cuartoCuarto: {
-        type: DataTypes.INTEGER,
-        references: {
-          model: "Estadistica",
+          model: "Partido",
           key: "id",
         },
       },

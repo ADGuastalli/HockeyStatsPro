@@ -9,22 +9,29 @@ const Partido = require("./Partido")(sequelize, DataTypes);
 const Club = require("./Clubes")(sequelize, DataTypes);
 
 // Relaciones
+// Relaciones Usuario - Club
 Usuario.belongsTo(Club, { foreignKey: "clubId", as: "club" });
 Club.hasMany(Usuario, { foreignKey: "clubId", as: "usuarios" });
+
+// Relaciones Partido - Usuario (un usuario puede tener muchos partidos)
 Usuario.hasMany(Partido, { foreignKey: "usuarioId" });
 Partido.belongsTo(Usuario, { foreignKey: "usuarioId" });
+
+// Relaciones Partido - Torneo
 Torneo.hasMany(Partido, { foreignKey: "torneoId" });
 Partido.belongsTo(Torneo, { foreignKey: "torneoId" });
-Estadistica.hasOne(Cuarto, { foreignKey: "primerCuarto" });
-Estadistica.hasOne(Cuarto, { foreignKey: "segundoCuarto" });
-Estadistica.hasOne(Cuarto, { foreignKey: "tercerCuarto" });
-Estadistica.hasOne(Cuarto, { foreignKey: "cuartoCuarto" });
-Cuarto.belongsTo(Estadistica, { foreignKey: "primerCuarto" });
-Cuarto.belongsTo(Estadistica, { foreignKey: "segundoCuarto" });
-Cuarto.belongsTo(Estadistica, { foreignKey: "tercerCuarto" });
-Cuarto.belongsTo(Estadistica, { foreignKey: "cuartoCuarto" });
-Cuarto.hasOne(Partido, { foreignKey: "cuartoId" });
-Partido.belongsTo(Cuarto, { foreignKey: "cuartoId" });
+
+// Relaciones Partido - Cuarto (un partido tiene 4 cuartos)
+Partido.hasMany(Cuarto, { foreignKey: "partidoId", as: "cuartos" });
+Cuarto.belongsTo(Partido, { foreignKey: "partidoId" });
+
+// Relaciones Cuarto - Estadística (cada cuarto puede tener muchas estadísticas)
+Cuarto.hasMany(Estadistica, { foreignKey: "cuartoId", as: "estadisticas" });
+Estadistica.belongsTo(Cuarto, { foreignKey: "cuartoId" });
+
+// Relación Club - Partido (un club puede participar en muchos partidos)
+Club.hasMany(Partido, { foreignKey: "clubId", as: "partidos" });
+Partido.belongsTo(Club, { foreignKey: "clubId" });
 
 module.exports = {
   sequelize,

@@ -58,6 +58,14 @@ module.exports = (sequelize, DataTypes) => {
         defaultValue: 0,
         allowNull: true,
       },
+      cuartoId: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+          model: "Cuarto",
+          key: "id",
+        },
+      },
     },
     {
       tableName: "Estadistica",
