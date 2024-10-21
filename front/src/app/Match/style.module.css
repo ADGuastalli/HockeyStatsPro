@@ -1,0 +1,24 @@
+.conteiner {
+  background-image: url("../../../src/app/public/svg/Fondo.png");
+  background-size: cover; /* Asegura que la imagen cubra todo el contenedor */
+  background-position: center; /* Centra la imagen en el contenedor */
+  height: 100vh; /* Ocupa toda la altura de la ventana */
+  width: 100vw; /* Ocupa todo el ancho de la ventana */
+  display: flex; /* Opcional: para centrar el contenido */
+  justify-content: center; /* Opcional: para centrar el contenido horizontalmente */
+  align-items: center; /* Opcional: para centrar el contenido verticalmente */
+}
+
+/* Estilos para pantallas en orientación vertical */
+@media (orientation: portrait) {
+  .conteiner {
+    background-size: cover; /* Mantener tamaño adecuado */
+  }
+}
+
+/* Estilos para pantallas en orientación horizontal */
+@media (orientation: landscape) {
+  .conteiner {
+    background-size: cover; /* Mantener tamaño adecuado */
+  }
+}
