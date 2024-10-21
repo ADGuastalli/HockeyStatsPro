@@ -26,11 +26,28 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState<boolean>(true);
   const router = useRouter();
 
+  // Cargar datos de localStorage
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    const storedAuth = localStorage.getItem("isAuthenticated");
+
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+      setIsAuthenticated(storedAuth === "true");
+    }
+
+    setLoading(false);
+  }, []);
+
   const login = async (credentials: ILogin) => {
     try {
       const data = await postSignin(credentials);
-      setUser(data); // Establece el usuario recibido del backend
+      setUser(data);
       setIsAuthenticated(true);
+      localStorage.setItem("user", JSON.stringify(data.usuario)); // Guardar usuario en localStorage
+      localStorage.setItem("isAuthenticated", "true"); // Guardar estado de autenticación
+      console.log("datos del usuario desde el back", data);
+
       return true;
     } catch (error) {
       console.error("Error en el login:", error);
@@ -51,13 +68,10 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
   const logout = () => {
     setUser(null);
     setIsAuthenticated(false);
+    localStorage.removeItem("user"); // Limpiar localStorage
+    localStorage.removeItem("isAuthenticated"); // Limpiar estado de autenticación
     router.push("/");
   };
-
-  useEffect(() => {
-    // Aquí puedes agregar lógica si deseas persistir la sesión de alguna manera
-    setLoading(false);
-  }, []);
 
   return (
     <UserContext.Provider

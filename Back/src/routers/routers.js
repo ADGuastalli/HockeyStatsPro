@@ -5,6 +5,7 @@ const clubRouter = require("./clubRoutes");
 const PartidoRouter = require("./partidoRouter");
 const CuartoRouter = require("./cuartoRouter");
 const EstadisticaRouter = require("./estadisticaRouter");
+const torneoRouter = require("./torneoRouter");
 
 const router = express.Router();
 
@@ -22,5 +23,8 @@ router.use("/cuartos", CuartoRouter);
 
 // Ruta de estadisticas
 router.use("/estadisticas", EstadisticaRouter);
+
+// Ruta de torneos
+router.use("/torneos", torneoRouter);
 
 module.exports = router;

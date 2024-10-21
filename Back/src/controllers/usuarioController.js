@@ -80,7 +80,7 @@ class UserController {
 
       if (passwordMatch) {
         // Login exitoso sin token
-        res.status(200).json({ usuario }); // Devuelve el usuario sin token
+        res.status(200).json({ usuario });
       } else {
         res.status(401).json({ error: "Credenciales incorrectas" });
       }

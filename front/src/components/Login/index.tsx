@@ -45,7 +45,7 @@ export default function LoginComponent() {
           showConfirmButton: false,
         });
         setTimeout(() => {
-          router.push("/Match");
+          router.push("/MisPartidos");
         }, 2000);
       } else {
         Swal.fire({

@@ -18,6 +18,10 @@ interface IErrorsRegister {
 }
 
 interface IUserProfile {
+  usuario: IUsuario;
+}
+
+interface IUsuario {
   id: string;
   nombre: string;
   club: string;
