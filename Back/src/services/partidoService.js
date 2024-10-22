@@ -28,6 +28,18 @@ class PartidoService {
     }
     throw new Error("Partido no encontrado");
   }
+  async getPartidosByUsuarioId(usuarioId) {
+    try {
+      const partidos = await Partido.findAll({
+        where: {
+          usuarioId,
+        },
+      });
+      return partidos;
+    } catch (error) {
+      throw new Error("Error al obtener los partidos: " + error.message);
+    }
+  }
 }
 
 module.exports = new PartidoService();

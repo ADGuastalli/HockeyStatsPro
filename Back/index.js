@@ -2,8 +2,7 @@ require("dotenv").config();
 const express = require("express");
 const sequelize = require("./src/db");
 const routes = require("./src/routers/routers");
-const preloadClubs = require("./src/preload");
-const preloadTorneos = require("./src/preload");
+const { preloadClubs, preloadTorneos } = require("./src/preload");
 const cors = require("cors");
 
 const app = express();
@@ -29,11 +28,8 @@ async function testConnection() {
     await sequelize.sync({ force: false }); // Eliminar y recrear tablas
     console.log("Las tablas han sido sincronizadas.");
 
-    // Cargar clubes
-    await preloadClubs();
-
-    // Cargar torneos
     await preloadTorneos();
+    await preloadClubs();
   } catch (error) {
     console.error("No se pudo conectar a la base de datos:", error);
   }

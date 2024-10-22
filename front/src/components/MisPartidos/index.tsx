@@ -1,11 +1,15 @@
 "use client";
-import React, { useContext, useEffect } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import Logo from "../../app/public/svg/Logo.png";
 import Image from "next/image";
 import { UserContext } from "@/context/userContext";
-import { getAllPartidos, getEstadisticaPartido } from "@/server/fetchPartidos";
+import {
+  getEstadisticaPartido,
+  obtenerPartidosPorUsuario,
+} from "@/server/fetchPartidos";
 import Swal from "sweetalert2";
 import { getAllClubes } from "@/server/fetchClubes";
+import Link from "next/link";
 
 interface Partido {
   id: number;
@@ -33,62 +37,69 @@ interface Estadistica {
   ingresoE: number;
   tirosA: number;
   tirosE: number;
-  cuartoId: number;
+  cuartoNumero: number;
 }
 
-export default function MisPartidosComponet() {
-  const { user, isAuthenticated } = useContext(UserContext);
-  const [partidos, setPartidos] = React.useState<Partido[]>([]);
-  const [estadisticas, setEstadisticas] = React.useState<Estadistica[] | null>(
-    null
-  );
-  const [clubes, setClubes] = React.useState<Club[]>([]);
+export default function MisPartidosComponent() {
+  const { user, loading } = useContext(UserContext);
+  const [partidos, setPartidos] = useState<Partido[]>([]);
+  const [estadisticas, setEstadisticas] = useState<Estadistica[]>([]);
+  const [clubes, setClubes] = useState<Club[]>([]);
+
+  const usuarioId = user?.usuario?.id ?? null;
+  console.log("afuera", usuarioId);
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      Swal.fire({
-        title: "No estás autenticado",
-        text: "Serás redirigido a la página de inicio de sesión.",
-        icon: "warning",
-        confirmButtonText: "Aceptar",
-      }).then((result) => {
-        if (result.isConfirmed) {
-          window.location.href = "/login";
-        }
-      });
-    } else {
-      const fetchPartidos = async () => {
-        try {
-          const data = await getAllPartidos();
-          setPartidos(data);
-        } catch (error) {
-          console.error("Error al obtener los partidos:", error);
-        }
-      };
-      const fetchClubes = async () => {
-        try {
-          const data = await getAllClubes();
-          setClubes(data);
-        } catch (error) {
-          console.error("Error al obtener los clubes:", error);
-        }
-      };
+    const fetchData = async () => {
+      if (usuarioId) {
+        console.log(usuarioId);
 
-      fetchPartidos();
-      fetchClubes();
-    }
-  }, [isAuthenticated]);
+        try {
+          const [partidosData, clubesData] = await Promise.all([
+            obtenerPartidosPorUsuario(usuarioId),
+            getAllClubes(),
+          ]);
+          setPartidos(partidosData || []);
+          setClubes(clubesData || []);
+          console.log("partidos:", partidosData);
+          console.log("clubes:", clubesData);
+        } catch (error) {
+          Swal.fire({
+            title: "Error",
+            text: "No se pudo obtener la información.",
+            icon: "error",
+            confirmButtonText: "Aceptar",
+          });
+          console.error("Error al obtener datos:", error);
+        }
+      }
+    };
 
-  const { nombre } = user?.usuario || {};
+    fetchData();
+  }, [usuarioId]);
 
   const handleViewEstadisticas = async (partidoId: number) => {
     try {
       const stats = await getEstadisticaPartido(partidoId.toString());
-      const allEstadisticas = stats.flatMap((stat: any) => stat.estadisticas);
-      setEstadisticas(allEstadisticas);
-      console.log("Estadísticas del partido:", allEstadisticas);
+      if (stats && stats.length > 0) {
+        setEstadisticas(stats);
+      } else {
+        Swal.fire({
+          title: "Sin Estadísticas",
+          text: "No se encontraron estadísticas para este partido.",
+          icon: "info",
+          confirmButtonText: "Aceptar",
+        });
+        setEstadisticas([]);
+      }
     } catch (error) {
-      console.error("Error al obtener las estadísticas:", error);
+      Swal.fire({
+        title: "Error",
+        text: "No se pudo obtener las estadísticas.",
+        icon: "error",
+        confirmButtonText: "Aceptar",
+      });
+      console.error("Error al obtener estadísticas:", error);
     }
   };
 
@@ -98,35 +109,19 @@ export default function MisPartidosComponet() {
   };
 
   const calcularTotales = () => {
-    if (!estadisticas) {
-      return {
-        golA: 0,
-        golE: 0,
-        ccA: 0,
-        ccE: 0,
-        largoA: 0,
-        largoE: 0,
-        ingresoA: 0,
-        ingresoE: 0,
-        tirosA: 0,
-        tirosE: 0,
-      };
-    }
     return estadisticas.reduce(
-      (totales, estadistica) => {
-        return {
-          golA: totales.golA + estadistica.golA,
-          golE: totales.golE + estadistica.golE,
-          ccA: totales.ccA + estadistica.ccA,
-          ccE: totales.ccE + estadistica.ccE,
-          largoA: totales.largoA + estadistica.largoA,
-          largoE: totales.largoE + estadistica.largoE,
-          ingresoA: totales.ingresoA + estadistica.ingresoA,
-          ingresoE: totales.ingresoE + estadistica.ingresoE,
-          tirosA: totales.tirosA + estadistica.tirosA,
-          tirosE: totales.tirosE + estadistica.tirosE,
-        };
-      },
+      (totales, estadistica) => ({
+        golA: totales.golA + estadistica.golA,
+        golE: totales.golE + estadistica.golE,
+        ccA: totales.ccA + estadistica.ccA,
+        ccE: totales.ccE + estadistica.ccE,
+        largoA: totales.largoA + estadistica.largoA,
+        largoE: totales.largoE + estadistica.largoE,
+        ingresoA: totales.ingresoA + estadistica.ingresoA,
+        ingresoE: totales.ingresoE + estadistica.ingresoE,
+        tirosA: totales.tirosA + estadistica.tirosA,
+        tirosE: totales.tirosE + estadistica.tirosE,
+      }),
       {
         golA: 0,
         golE: 0,
@@ -144,152 +139,128 @@ export default function MisPartidosComponet() {
 
   const totales = calcularTotales();
 
+  if (loading) {
+    return <div>Cargando...</div>;
+  }
+
   return (
-    <div className="flex flex-col justify-center items-center min-h-screen">
+    <div className="flex flex-col justify-center items-center min-h-screen mx-5">
       <div>
         <Image src={Logo} alt="Logo" width={300} height={300} />
       </div>
-
       <div>
-        <h1 className="text-xl font-bold">
-          Bienvenido <span className="text-2xl">{nombre}</span>
+        <h1 className="text-2xl font-bold">
+          Bienvenido <span className="text-3xl">{user?.usuario?.nombre}</span>
         </h1>
+        <h2 className="text-lg font-semibold">
+          Club:{" "}
+          <span className="text-xl">{getClubName(user?.usuario?.clubId!)}</span>
+        </h2>
       </div>
-
+      <div className="mt-5">
+        <Link
+          href="/Match"
+          className="bg-blue-500 text-white px-5 py-3 rounded"
+        >
+          Crear Partido
+        </Link>
+      </div>
       <div className="mt-5">
         <h2 className="text-lg font-semibold">Mis Partidos:</h2>
-        <ul className="list-none">
-          {partidos.map((partido) => (
-            <li
-              key={partido.id}
-              className="flex justify-between items-center my-2 p-2 border rounded"
-            >
-              <span>Partido Vs: {getClubName(partido.clubId)} </span>
-              <span>Fecha: {new Date(partido.fecha).toLocaleDateString()}</span>
-              <button
-                onClick={() => handleViewEstadisticas(partido.id)}
-                className="bg-blue-500 text-white px-3 py-1 rounded"
+        <ul className="list-none mx-5">
+          {partidos.length > 0 ? (
+            partidos.map((partido) => (
+              <li
+                key={partido.id}
+                className="flex justify-between items-center my-2 p-2 border rounded"
               >
-                Ver Estadísticas
-              </button>
-            </li>
-          ))}
+                <span className="text-sm">
+                  Partido Vs: {getClubName(partido.clubId)}
+                </span>
+                <span className="text-sm">
+                  Fecha: {new Date(partido.fecha).toLocaleDateString()}
+                </span>
+                <button
+                  onClick={() => handleViewEstadisticas(partido.id)}
+                  className="bg-blue-500 text-white px-3 py-1 rounded text-sm"
+                >
+                  Ver Estadísticas
+                </button>
+              </li>
+            ))
+          ) : (
+            <li className="text-sm">Aún no tienes partidos registrados.</li>
+          )}
         </ul>
       </div>
 
-      {estadisticas && (
-        <div className="mt-5 overflow-x-auto w-full mb-10">
+      {estadisticas.length > 0 && (
+        <div className="mt-5 overflow-x-auto w-full mb-10 mx-5">
           <h2 className="text-lg font-semibold">Estadísticas del Partido:</h2>
-          <table className="min-w-full border-collapse border border-gray-200">
+          <table className="min-w-full border-collapse border border-gray-200 my-2 mx-5">
             <thead>
               <tr>
-                <th className="border border-gray-300 p-2">Cuarto</th>
-                <th className="border border-gray-300 p-2 text-sm">
-                  Goles a Favor
-                </th>
-                <th className="border border-gray-300 p-2 text-sm">
-                  Goles En Contra
-                </th>
-                <th className="border border-gray-300 p-2 text-sm">
-                  C.C. a Favor
-                </th>
-                <th className="border border-gray-300 p-2 text-sm">
-                  C.C. En Contra
-                </th>
-                <th className="border border-gray-300 p-2 text-sm">
-                  Largo a Favor
-                </th>
-                <th className="border border-gray-300 p-2 text-sm">
-                  Largo En Contra
-                </th>
-                <th className="border border-gray-300 p-2 text-sm">
-                  Ingreso a Favor
-                </th>
-                <th className="border border-gray-300 p-2 text-sm">
-                  Ingreso En Contra
-                </th>
-                <th className="border border-gray-300 p-2 text-sm">
-                  Tiros al Arco a Favor
-                </th>
-                <th className="border border-gray-300 p-2 text-sm">
-                  Tiros al Arco En Contra
-                </th>
+                {[
+                  "Cuarto",
+                  "Goles a Favor",
+                  "Goles En Contra",
+                  "C.C. a Favor",
+                  "C.C. En Contra",
+                  "Largo a Favor",
+                  "Largo En Contra",
+                  "Ingreso a Favor",
+                  "Ingreso En Contra",
+                  "Tiros al Arco a Favor",
+                  "Tiros al Arco En Contra",
+                ].map((header, index) => (
+                  <th
+                    key={index}
+                    className="border border-gray-300 p-2 text-sm"
+                  >
+                    {header}
+                  </th>
+                ))}
               </tr>
             </thead>
             <tbody>
               {estadisticas
-                .sort((a, b) => a.cuartoId - b.cuartoId)
+                .sort((a, b) => a.cuartoNumero - b.cuartoNumero)
                 .map((estadistica) => (
                   <tr key={estadistica.id}>
-                    <td className="border border-gray-300 p-2 text-center font-bold">
-                      {estadistica.cuartoId}
-                    </td>
-                    <td className="border border-gray-300 p-2 text-center">
-                      {estadistica.golA}
-                    </td>
-                    <td className="border border-gray-300 p-2 text-center">
-                      {estadistica.golE}
-                    </td>
-                    <td className="border border-gray-300 p-2 text-center">
-                      {estadistica.ccA}
-                    </td>
-                    <td className="border border-gray-300 p-2 text-center">
-                      {estadistica.ccE}
-                    </td>
-                    <td className="border border-gray-300 p-2 text-center">
-                      {estadistica.largoA}
-                    </td>
-                    <td className="border border-gray-300 p-2 text-center">
-                      {estadistica.largoE}
-                    </td>
-                    <td className="border border-gray-300 p-2 text-center">
-                      {estadistica.ingresoA}
-                    </td>
-                    <td className="border border-gray-300 p-2 text-center">
-                      {estadistica.ingresoE}
-                    </td>
-                    <td className="border border-gray-300 p-2 text-center">
-                      {estadistica.tirosA}
-                    </td>
-                    <td className="border border-gray-300 p-2 text-center">
-                      {estadistica.tirosE}
-                    </td>
+                    {[
+                      estadistica.cuartoNumero,
+                      estadistica.golA,
+                      estadistica.golE,
+                      estadistica.ccA,
+                      estadistica.ccE,
+                      estadistica.largoA,
+                      estadistica.largoE,
+                      estadistica.ingresoA,
+                      estadistica.ingresoE,
+                      estadistica.tirosA,
+                      estadistica.tirosE,
+                    ].map((value, index) => (
+                      <td
+                        key={index}
+                        className="border border-gray-300 p-2 text-center"
+                      >
+                        {value}
+                      </td>
+                    ))}
                   </tr>
                 ))}
-              <tr className="font-bold">
-                <td className="border border-gray-300 p-2 text-center">
+              <tr>
+                <td className="border border-gray-300 p-2 text-center font-bold">
                   Totales
                 </td>
-                <td className="border border-gray-300 p-2 text-center">
-                  {totales.golA}
-                </td>
-                <td className="border border-gray-300 p-2 text-center">
-                  {totales.golE}
-                </td>
-                <td className="border border-gray-300 p-2 text-center">
-                  {totales.ccA}
-                </td>
-                <td className="border border-gray-300 p-2 text-center">
-                  {totales.ccE}
-                </td>
-                <td className="border border-gray-300 p-2 text-center">
-                  {totales.largoA}
-                </td>
-                <td className="border border-gray-300 p-2 text-center">
-                  {totales.largoE}
-                </td>
-                <td className="border border-gray-300 p-2 text-center">
-                  {totales.ingresoA}
-                </td>
-                <td className="border border-gray-300 p-2 text-center">
-                  {totales.ingresoE}
-                </td>
-                <td className="border border-gray-300 p-2 text-center">
-                  {totales.tirosA}
-                </td>
-                <td className="border border-gray-300 p-2 text-center">
-                  {totales.tirosE}
-                </td>
+                {Object.values(totales).map((total, index) => (
+                  <td
+                    key={index}
+                    className="border border-gray-300 p-2 text-center"
+                  >
+                    {total}
+                  </td>
+                ))}
               </tr>
             </tbody>
           </table>

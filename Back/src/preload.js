@@ -1,5 +1,6 @@
 // preload.js
 const { Club } = require("./models");
+const { Torneo } = require("./models");
 
 const preloadClubs = async () => {
   const clubs = [
@@ -24,17 +25,12 @@ const preloadClubs = async () => {
     { nombre: "Universitario C" },
     { nombre: "Villa Mitre" },
   ];
-
   try {
-    // Verifica si ya hay clubes en la base de datos
     const existingClubs = await Club.findAll();
-
     if (existingClubs.length > 0) {
       console.log("Los clubes ya están precargados en la base de datos.");
-      return; // Si ya hay clubes, salimos de la función
+      return; // Salimos si ya hay clubes
     }
-
-    // Si no hay clubes, se procede a cargarlos
     await Club.bulkCreate(clubs, { ignoreDuplicates: true });
     console.log("Clubs precargados exitosamente.");
   } catch (error) {
@@ -42,23 +38,15 @@ const preloadClubs = async () => {
   }
 };
 
-module.exports = preloadClubs;
-
-const { Torneo } = require("./models");
-
 const preloadTorneos = async () => {
   const torneos = [{ nombre: "Apertura 2024" }, { nombre: "Clausura 2024" }];
 
   try {
-    // Verifica si ya hay torneos en la base de datos
     const existingTorneos = await Torneo.findAll();
-
     if (existingTorneos.length > 0) {
       console.log("Los torneos ya están precargados en la base de datos.");
-      return; // Si ya hay torneos, salimos de la función
+      return; // Salimos si ya hay torneos
     }
-
-    // Si no hay torneos, se procede a cargarlos
     await Torneo.bulkCreate(torneos, { ignoreDuplicates: true });
     console.log("Torneos precargados exitosamente.");
   } catch (error) {
@@ -66,4 +54,4 @@ const preloadTorneos = async () => {
   }
 };
 
-module.exports = preloadTorneos;
+module.exports = { preloadClubs, preloadTorneos };

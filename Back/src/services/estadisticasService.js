@@ -36,15 +36,12 @@ class EstadisticaService {
 
   // Obtener todas las estadísticas de un partido
   static async getEstadisticasByPartidoId(partidoId) {
-    // Obtener las estadísticas de los cuartos asociados a un partido
-    return await Cuarto.findAll({
-      where: { partidoId }, // Filtrar por partidoId
-      include: [
-        {
-          model: Estadistica, // Incluir las estadísticas
-          as: "estadisticas",
-        },
-      ],
+    if (!partidoId) {
+      throw new Error("El ID del partido es requerido");
+    }
+
+    return await Estadistica.findAll({
+      where: { partidoId }, // Asegúrate de que este campo esté definido en tu modelo
     });
   }
 }

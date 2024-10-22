@@ -24,7 +24,7 @@ interface IUserProfile {
 interface IUsuario {
   id: string;
   nombre: string;
-  club: string;
+  clubId: number;
   category: string;
   email: string;
 }
@@ -35,6 +35,20 @@ interface IRegister {
   category: string;
   email: string;
   password: string;
+}
+
+interface IEstadistica {
+  golA: number;
+  golE: number;
+  ccA: number;
+  ccE: number;
+  largoA: number;
+  largoE: number;
+  ingresoA: number;
+  ingresoE: number;
+  tirosA: number;
+  tirosE: number;
+  cuartoNumero: number;
 }
 
 interface IUserContext {
@@ -55,4 +69,5 @@ export type {
   IUserProfile,
   IRegister,
   IUserContext,
+  IEstadistica,
 };

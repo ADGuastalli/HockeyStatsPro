@@ -46,3 +46,17 @@ export const createPartido = async (data: any) => {
 
   return responseData;
 };
+
+export const obtenerPartidosPorUsuario = async (usuarioId: any) => {
+  try {
+    const response = await fetch(`${API}/api/partidos/usuario/${usuarioId}`);
+    if (!response.ok) {
+      throw new Error("Error al obtener los partidos");
+    }
+    const partidos = await response.json();
+    console.log("Partidos del usuario:", partidos);
+    return partidos;
+  } catch (error) {
+    console.error(error);
+  }
+};

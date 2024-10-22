@@ -9,4 +9,7 @@ router.post("/", PartidoController.createPartido); // Ruta protegida
 router.put("/:id", PartidoController.updatePartido); // Ruta protegida
 router.delete("/:id", PartidoController.deletePartido); // Ruta protegida
 
+// Obtener partidos por usuario
+router.get("/usuario/:usuarioId", PartidoController.getPartidosByUsuarioId);
+
 module.exports = router;

@@ -33,10 +33,11 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
 
     if (storedUser) {
       setUser(JSON.parse(storedUser));
-      setIsAuthenticated(storedAuth === "true");
     }
 
-    setLoading(false);
+    // Establecer estado de autenticación basado en localStorage
+    setIsAuthenticated(storedAuth === "true");
+    setLoading(false); // Establecer loading en false al final
   }, []);
 
   const login = async (credentials: ILogin) => {
@@ -47,7 +48,6 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
       localStorage.setItem("user", JSON.stringify(data.usuario)); // Guardar usuario en localStorage
       localStorage.setItem("isAuthenticated", "true"); // Guardar estado de autenticación
       console.log("datos del usuario desde el back", data);
-
       return true;
     } catch (error) {
       console.error("Error en el login:", error);
@@ -68,9 +68,8 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
   const logout = () => {
     setUser(null);
     setIsAuthenticated(false);
-    localStorage.removeItem("user"); // Limpiar localStorage
-    localStorage.removeItem("isAuthenticated"); // Limpiar estado de autenticación
-    router.push("/");
+    localStorage.removeItem("user");
+    localStorage.removeItem("isAuthenticated");
   };
 
   return (
